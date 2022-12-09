@@ -38,7 +38,7 @@ class FeedViewController: UIViewController {
     }
     
     @objc private func didTapOpenPost() {
-        let post = Post(title: "Best Post")
+        let post = Post(author: "Auto", description: "Audi cars", image: "first", likes: 12, views: 20)
         let postViewController = PostViewController(with: post)
         self.navigationController?.pushViewController(postViewController, animated: true)
     }
