@@ -28,7 +28,7 @@ class PostViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = post?.title
+        self.title = post?.author
         makeUI()
     }
     

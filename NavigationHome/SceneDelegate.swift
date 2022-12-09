@@ -13,43 +13,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let scene = (scene as? UIWindowScene) else { return }
-        
-        window = UIWindow(windowScene: scene)
-        window?.windowScene = scene
-        
-       setupInitViews()
-    }
-    
-    private func setupInitViews() {
-        let tabBarController = UITabBarController()
-        tabBarController.viewControllers = [getFeedViewController(), getProfileViewController()]
-        tabBarController.tabBar.tintColor = .black
-        window?.rootViewController = tabBarController
-        
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        window = UIWindow(frame: UIScreen.main.bounds)
+        let home = TabBarController()
+        self.window?.rootViewController = home
         window?.makeKeyAndVisible()
-    }
-    
-    
-    private func getProfileViewController() -> UINavigationController {
-        let profileViewController = ProfileViewController()
-        profileViewController.title = "Profile"
-        profileViewController.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.circle"), tag: 1)
-        let navigationController = UINavigationController(rootViewController: profileViewController)
-        navigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
-        navigationController.navigationBar.tintColor = .black
-        return navigationController
-    }
-    
-    private func getFeedViewController() -> UINavigationController {
-        let feedViewController = FeedViewController()
-        feedViewController.title = "Feed"
-        feedViewController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "list.bullet"), tag: 2)
-        
-        let navigationController = UINavigationController(rootViewController: feedViewController)
-        navigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
-        navigationController.navigationBar.tintColor = .black
-        return navigationController
+        window?.windowScene = windowScene
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
