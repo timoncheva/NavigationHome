@@ -9,6 +9,11 @@ import UIKit
 
 class ProfileViewController: UIViewController {
     
+    enum Sections {
+        case posts
+        case photos
+    }
+    
     private lazy var profileHeaderView: ProfileHeaderView = {
         let view = ProfileHeaderView(frame: .zero)
         view.backgroundColor = .systemGray6
@@ -22,6 +27,7 @@ class ProfileViewController: UIViewController {
         tableView.estimatedRowHeight = 44
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PhotosTableViewCell")
         tableView.register(PostTableViewCell.self, forCellReuseIdentifier: "FeedItemCell")
         tableView.register(ProfileHeaderView.self, forHeaderFooterViewReuseIdentifier: "ProfileHeaderView")
         tableView.backgroundColor = .systemGray6
@@ -33,10 +39,13 @@ class ProfileViewController: UIViewController {
     
     private var dataSource: [Post] = []
     
+    private let sections: [Sections] = [.photos, .posts]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
+        navigationController?.navigationBar.isHidden = false
+        navigationItem.title = "Profile"
         setupView()
         setConstraints()
         addDataSource()
@@ -79,29 +88,88 @@ extension ProfileViewController {
 extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource.count
+        switch sections[section] {
+        case .photos:
+            return 1
+        case .posts:
+            return dataSource.count
+        }
+        
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return sections.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "FeedItemCell", for: indexPath) as? PostTableViewCell else {
-            return UITableViewCell()
+        
+        switch sections[indexPath.section] {
+        case .photos:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PhotosTableViewCell", for: indexPath) as? PhotosTableViewCell else {
+                return UITableViewCell()
+            }
+            
+            cell.selectionStyle = .none
+            return cell
+        case .posts:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "FeedItemCell", for: indexPath) as? PostTableViewCell else {
+                return UITableViewCell()
+            }
+            
+            cell.isLiked = { [weak self] in
+                self?.dataSource[indexPath.row].likes += 1
+                self?.tableView.reloadData()
+            }
+            
+            let article = self.dataSource[indexPath.row]
+            let viewModel = PostTableViewCell.ViewModel(author: article.author,
+                                                        image: article.image,
+                                                        description: article.description,
+                                                        likes: article.likes,
+                                                        views: article.views)
+            cell.setup(viewModel: viewModel)
+            return cell
         }
-        let article = self.dataSource[indexPath.row]
-        let viewModel = PostTableViewCell.ViewModel(author: article.author,
-                                                    image: article.image,
-                                                    description: article.description,
-                                                    likes: article.likes,
-                                                    views: article.views)
-        cell.setup(viewModel: viewModel)
-        return cell
+        
+        
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "ProfileHeaderView") as! ProfileHeaderView
-        return headerView
+        switch sections[section] {
+        case .photos:
+            let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "ProfileHeaderView") as! ProfileHeaderView
+            return headerView
+            
+        case .posts:
+            return nil
+        }
+        
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 200
+        switch sections[section] {
+        case .photos:
+            return 220
+        case .posts:
+            return 0
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        switch sections[indexPath.section] {
+        case .photos:
+            self.navigationController?.pushViewController(PhotosVC(), animated: true)
+        case .posts:
+            dataSource[indexPath.row].views += 1
+            self.tableView.reloadRows(at: [indexPath], with: .none)
+            let vc = PostDetailsVC(post: dataSource[indexPath.row])
+            vc.didTapLike = {[weak self] likedPost in
+                self?.dataSource[indexPath.row].likes += 1
+                tableView.reloadRows(at: [indexPath], with: .none)
+            }
+            navigationController?.pushViewController(vc, animated: true)
+        }
+        
+        
     }
 }

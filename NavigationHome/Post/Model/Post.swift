@@ -8,7 +8,7 @@
 import Foundation
 
 struct Post {
-
+    let id = UUID()
     let author, description, image: String
     var likes, views: Int
     
