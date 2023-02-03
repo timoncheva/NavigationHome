@@ -99,16 +99,15 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
     }
     
     @objc func buttonPressed() {
-        guard let status = statusLabel.text else { return }
+        guard let status = statusTextField.text else { return }
         if !status.isEmpty {
             UIView.animate(withDuration: 0.5) {
-                self.statusLabel.text = self.statusTextField.text
+                self.statusLabel.text = status
                 
             } completion: { _ in
                 self.statusTextField.text = nil
             }
-        }
-        if status.isEmpty {
+        } else {
             statusTextField.shakeField()
         }
         endEditing(true)
